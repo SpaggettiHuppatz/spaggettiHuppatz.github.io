@@ -1,36 +1,35 @@
 /**
  * main.js — RAW FORM fitness site
  *
- * HOW TO ADD A NEW POST:
- * Open data/posts.json and add a new object to the array.
- * The site will automatically pick it up — no other changes needed.
+ * ─── HOW TO ADD A NEW POST ────────────────────────────────
+ * Open data/posts.json and append a new object to the array.
+ * The site picks it up automatically — no other files to touch.
  *
  * POST SCHEMA:
  * {
- *   "id":          string  — URL-friendly slug, e.g. "my-first-planche"
- *   "date":        string  — ISO date, e.g. "2025-12-01"
- *   "tag":         string  — One of: SKILL | MILESTONE | PROGRESS | FOUNDATION
- *   "title":       string  — Post headline
- *   "description": string  — Full write-up. Use \n\n for paragraph breaks.
- *   "photos":      string[] — Array of image URLs (ideally 3 for the grid)
- *   "stats":       { label: string, value: string }[]  — Up to 3 stats shown above the text
+ *   "id":          string   — URL slug, e.g. "pistol-squat-progress"
+ *   "date":        string   — ISO date, e.g. "2026-01-20"
+ *   "tag":         string   — SKILL | MILESTONE | PROGRESS | FOUNDATION
+ *   "title":       string   — Headline
+ *   "description": string   — Write-up. Use \n\n for paragraph breaks.
+ *   "photos":      string[] — Image URLs (3 recommended)
+ *   "stats":       { label: string, value: string }[]  — Up to 3
  * }
  */
 
 (function () {
   'use strict';
 
-  /* ── NAV TOGGLE (mobile) ──────────────────────────────── */
-  const toggle = document.getElementById('nav-toggle');
+  /* ── NAV TOGGLE ───────────────────────────────────────── */
+  const toggle   = document.getElementById('nav-toggle');
   const navLinks = document.getElementById('nav-links');
 
   toggle.addEventListener('click', () => {
-    const isOpen = navLinks.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', String(isOpen));
-    toggle.textContent = isOpen ? 'CLOSE' : 'MENU';
+    const open = navLinks.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.textContent = open ? 'CLOSE' : 'MENU';
   });
 
-  /* Close nav on link click */
   navLinks.querySelectorAll('a').forEach(a => {
     a.addEventListener('click', () => {
       navLinks.classList.remove('open');
@@ -39,137 +38,112 @@
     });
   });
 
-  /* ── ACTIVE NAV on scroll ─────────────────────────────── */
-  const sections = ['index-section', 'posts-section', 'achievements-section'];
-  const navAnchors = navLinks.querySelectorAll('a');
+  /* ── ACTIVE NAV ───────────────────────────────────────── */
+  const sectionIds = ['index-section', 'posts-section', 'achievements-section'];
+  const navAs = navLinks.querySelectorAll('a');
 
-  function updateActiveNav() {
-    let current = '';
-    sections.forEach(id => {
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sectionIds.forEach(id => {
       const el = document.getElementById(id);
-      if (el && window.scrollY >= el.offsetTop - 120) current = id;
+      if (el && window.scrollY >= el.offsetTop - 130) cur = id;
     });
-    navAnchors.forEach(a => {
-      const href = a.getAttribute('href').replace('#', '');
-      a.classList.toggle('active', href === current);
+    navAs.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+    });
+  }, { passive: true });
+
+  /* ── HELPERS ──────────────────────────────────────────── */
+  function fmtDate(iso) {
+    return new Date(iso + 'T00:00:00').toLocaleDateString('en-AU', {
+      year: 'numeric', month: 'short', day: 'numeric'
     });
   }
 
-  window.addEventListener('scroll', updateActiveNav, { passive: true });
-
-  /* ── FORMAT DATE ──────────────────────────────────────── */
-  function formatDate(iso) {
-    const d = new Date(iso + 'T00:00:00');
-    return d.toLocaleDateString('en-AU', { year: 'numeric', month: 'short', day: 'numeric' });
-  }
-
-  /* ── TAG CLASS ────────────────────────────────────────── */
   function tagClass(tag) {
-    const map = {
-      MILESTONE: 'tag-milestone',
-      PROGRESS: 'tag-progress',
-      FOUNDATION: 'tag-foundation',
-    };
-    return map[tag] || '';
+    return ({ MILESTONE: 'tag-milestone', PROGRESS: 'tag-progress', FOUNDATION: 'tag-foundation' }[tag] || 'tag-skill');
   }
 
-  /* ── BUILD INDEX CARD ─────────────────────────────────── */
+  /* ── INDEX CARD ───────────────────────────────────────── */
   function buildIndexCard(post, idx) {
-    const card = document.createElement('div');
-    card.className = 'index-card';
-    card.setAttribute('role', 'link');
-    card.setAttribute('tabindex', '0');
-    card.setAttribute('aria-label', `Jump to: ${post.title}`);
-
-    card.innerHTML = `
-      <p class="index-card-num">${String(idx + 1).padStart(2, '0')}</p>
-      <h3 class="index-card-title">${post.title}</h3>
-      <span class="tag-pill ${tagClass(post.tag)}">${post.tag}</span>
-      <p class="index-card-date">${formatDate(post.date)}</p>
-      <span class="index-card-arrow" aria-hidden="true">↗</span>
+    const el = document.createElement('div');
+    el.className = 'index-card';
+    el.setAttribute('role', 'link');
+    el.setAttribute('tabindex', '0');
+    el.innerHTML = `
+      <p class="ic-num">${String(idx + 1).padStart(2, '0')}</p>
+      <h3 class="ic-title">${post.title}</h3>
+      <span class="tag ${tagClass(post.tag)}">${post.tag}</span>
+      <p class="ic-date">${fmtDate(post.date)}</p>
+      <span class="ic-arrow" aria-hidden="true">↗</span>
     `;
-
-    function jump() {
-      const target = document.getElementById('post-' + post.id);
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-
-    card.addEventListener('click', jump);
-    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') jump(); });
-    return card;
+    const jump = () => document.getElementById('post-' + post.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    el.addEventListener('click', jump);
+    el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') jump(); });
+    return el;
   }
 
-  /* ── BUILD POST BLOCK ─────────────────────────────────── */
+  /* ── POST BLOCK ───────────────────────────────────────── */
   function buildPost(post) {
-    /* Stats HTML */
     const statsHTML = (post.stats || []).slice(0, 3).map(s => `
-      <div class="stat-block">
-        <span class="stat-block-value">${s.value}</span>
-        <span class="stat-block-label">${s.label}</span>
-      </div>
-    `).join('');
+      <div class="stat-cell">
+        <span class="stat-val">${s.value}</span>
+        <span class="stat-lbl">${s.label}</span>
+      </div>`).join('');
 
-    /* Photos HTML — up to 3, graceful if fewer */
-    const photos = (post.photos || []).slice(0, 3);
-    while (photos.length < 3) photos.push(null); /* pad to 3 */
-    const photosHTML = photos.map(url => `
+    const photos = [...(post.photos || [])].slice(0, 3);
+    while (photos.length < 3) photos.push(null);
+
+    const photosHTML = photos.map((url, i) => `
       <div class="photo-cell">
         ${url
-          ? `<img src="${url}" alt="Training photo for ${post.title}" loading="lazy" />`
-          : `<div style="background: var(--grey-200); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-               <span style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--grey-400);">NO PHOTO</span>
-             </div>`}
-      </div>
-    `).join('');
+          ? `<img src="${url}" alt="Photo ${i + 1} — ${post.title}" loading="lazy" />`
+          : `<div style="background:var(--grey-200);width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><span style="font-family:var(--font-m);font-size:0.6rem;color:var(--grey-400);">—</span></div>`
+        }
+      </div>`).join('');
 
-    /* Description — convert double newlines to paragraphs */
-    const paragraphs = post.description.trim().split(/\n\n+/);
-    const descHTML = paragraphs.map(p => `<p class="post-description" style="margin-bottom: 1rem;">${p.replace(/\n/g, '<br />')}</p>`).join('');
+    const descHTML = post.description.trim().split(/\n\n+/)
+      .map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
 
-    const block = document.createElement('div');
-    block.className = 'post-block scroll-target';
-    block.id = 'post-' + post.id;
+    const el = document.createElement('div');
+    el.className = 'post-block';
+    el.id = 'post-' + post.id;
 
-    block.innerHTML = `
-      <div class="site-container">
+    el.innerHTML = `
+      <div class="section-wrap">
         <div class="post-meta-bar">
           <div class="post-meta-left">
-            <span class="tag-pill ${tagClass(post.tag)}">${post.tag}</span>
-            <span class="post-date">${formatDate(post.date)}</span>
+            <span class="tag ${tagClass(post.tag)}">${post.tag}</span>
+            <span class="post-date">${fmtDate(post.date)}</span>
           </div>
-          <a href="#index-section" class="label" style="color: var(--grey-400); font-size: 0.65rem;">↑ Back to index</a>
+          <a href="#index-section" class="post-back">↑ Back to index</a>
         </div>
 
         <h2 class="post-title">${post.title}</h2>
 
-        <div class="post-layout">
+        <div class="post-body-grid">
 
-          <div class="post-body">
-            ${statsHTML ? `<div class="post-stats">${statsHTML}</div>` : ''}
-            ${descHTML}
+          <div class="post-text-col">
+            ${statsHTML ? `<div class="post-stats-row">${statsHTML}</div>` : ''}
+            <div class="post-desc">${descHTML}</div>
           </div>
 
-          <div class="post-sidebar">
-            <div class="photo-grid" style="margin-bottom: 1.5rem;">
-              ${photosHTML}
-            </div>
+          <div class="post-photo-col">
+            <div class="photo-grid">${photosHTML}</div>
           </div>
 
         </div>
       </div>
     `;
-
-    return block;
+    return el;
   }
 
-  /* ── LOAD & RENDER ────────────────────────────────────── */
+  /* ── INIT ─────────────────────────────────────────────── */
   async function init() {
-    const indexGrid     = document.getElementById('index-grid');
+    const indexGrid      = document.getElementById('index-grid');
     const postsContainer = document.getElementById('posts-container');
-    const statEntries   = document.getElementById('stat-entries');
-    const indexCount    = document.getElementById('index-count');
+    const statEntries    = document.getElementById('stat-entries');
+    const indexCount     = document.getElementById('index-count');
 
     let posts;
     try {
@@ -177,33 +151,22 @@
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       posts = await res.json();
     } catch (err) {
-      const errMsg = `<div class="posts-error">
-        Failed to load posts.json — ${err.message}<br />
-        Make sure you're serving the site from a web server (not file://).
-      </div>`;
-      indexGrid.innerHTML = errMsg;
-      postsContainer.innerHTML = errMsg;
+      const msg = `<div class="section-wrap"><p class="error-msg">Could not load posts.json — ${err.message}<br>Serve from a web server, not file://</p></div>`;
+      indexGrid.innerHTML = msg;
+      postsContainer.innerHTML = msg;
       return;
     }
 
-    /* Sort newest first */
     posts = posts.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    /* Update counters */
     statEntries.textContent = posts.length;
-    indexCount.textContent = `${posts.length} entries`;
+    indexCount.textContent  = `${posts.length} entries`;
 
-    /* Render index */
     indexGrid.innerHTML = '';
-    posts.forEach((post, idx) => {
-      indexGrid.appendChild(buildIndexCard(post, idx));
-    });
+    posts.forEach((p, i) => indexGrid.appendChild(buildIndexCard(p, i)));
 
-    /* Render posts */
     postsContainer.innerHTML = '';
-    posts.forEach(post => {
-      postsContainer.appendChild(buildPost(post));
-    });
+    posts.forEach(p => postsContainer.appendChild(buildPost(p)));
   }
 
   init();
