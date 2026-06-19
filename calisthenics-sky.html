@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>The Calisthenics Sky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Space Grotesk',sans-serif;background:#0a0f1a;color:#e8eaf0;overflow-x:hidden}
+
+#meter{
+  position:fixed;left:0;top:0;bottom:0;width:60px;
+  background:#060a12;border-right:1px solid rgba(255,255,255,0.07);
+  display:flex;flex-direction:column;align-items:center;padding:20px 0;z-index:100
+}
+#meter-label{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;
+  color:#b4ff39;text-transform:uppercase;writing-mode:vertical-rl;
+  transform:rotate(180deg);margin-bottom:14px
+}
+#meter-bar{
+  flex:1;width:3px;background:rgba(255,255,255,0.08);border-radius:2px;
+  position:relative;margin:8px 0
+}
+#meter-fill{
+  position:absolute;bottom:0;left:0;right:0;background:#b4ff39;
+  border-radius:2px;transition:height .12s ease
+}
+#meter-val{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;color:#b4ff39;
+  letter-spacing:.06em;margin-top:8px
+}
+
+#scroll-hint{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  color:rgba(255,255,255,0.3);letter-spacing:.12em;
+  animation:pulse 2s infinite;z-index:50;pointer-events:none;
+  transition:opacity .4s
+}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:.7}}
+
+#stage{margin-left:60px;position:relative}
+
+#intro{
+  min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;padding:60px 60px 60px 60px;
+  border-bottom:1px solid rgba(255,255,255,0.06)
+}
+#intro .eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:.18em;color:#b4ff39;opacity:.7;
+  text-transform:uppercase;margin-bottom:28px
+}
+#intro h1{
+  font-size:clamp(3rem,7vw,6rem);font-weight:700;
+  letter-spacing:-.04em;line-height:.88;margin-bottom:28px
+}
+#intro h1 em{font-style:normal;color:#b4ff39}
+#intro p{
+  font-size:15px;color:rgba(255,255,255,0.45);
+  max-width:420px;line-height:1.85;margin-bottom:12px
+}
+#intro .scroll-cue{
+  margin-top:32px;font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:.14em
+}
+
+.zone-divider{
+  text-align:center;padding:52px 24px;
+  border-top:1px solid rgba(255,255,255,0.05);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  margin:16px 0
+}
+.zone-name{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:.22em;text-transform:uppercase;color:#b4ff39;opacity:.65
+}
+.zone-sub{
+  font-size:13px;color:rgba(255,255,255,0.25);margin-top:8px
+}
+
+.move-row{
+  display:flex;align-items:center;padding:40px 60px;min-height:280px;
+  position:relative;
+  opacity:0;transform:translateX(-40px);
+  transition:opacity .65s ease,transform .65s ease
+}
+.move-row.visible{opacity:1;transform:translateX(0)}
+.move-row.right{flex-direction:row-reverse}
+.move-row.right .move-text{padding-left:0;padding-right:44px;text-align:right}
+.move-row.right .move-desc{margin-left:auto}
+
+.move-figure{flex-shrink:0;width:180px;display:flex;justify-content:center;align-items:center}
+.move-text{flex:1;padding-left:44px}
+.move-level{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,0.35);margin-bottom:10px
+}
+.move-name{
+  font-size:clamp(1.6rem,3vw,2.4rem);font-weight:700;
+  letter-spacing:-.03em;line-height:1;margin-bottom:16px
+}
+.move-desc{
+  font-size:14px;line-height:1.8;
+  color:rgba(255,255,255,0.55);max-width:380px
+}
+
+.fact-card{
+  margin:0 60px 8px;padding:22px 30px;
+  background:rgba(180,255,57,0.05);
+  border-left:2px solid #b4ff39;
+  max-width:560px;
+  opacity:0;transform:translateY(24px);
+  transition:opacity .55s ease,transform .55s ease
+}
+.fact-card.right-align{
+  margin-left:auto;margin-right:60px;
+  border-left:none;border-right:2px solid #b4ff39;
+  text-align:right
+}
+.fact-card.visible{opacity:1;transform:translateY(0)}
+.fact-card p{font-size:13px;line-height:1.8;color:rgba(255,255,255,0.5);font-style:italic}
+
+#outro{
+  padding:100px 60px;border-top:1px solid rgba(255,255,255,0.06);
+  text-align:center;min-height:50vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center
+}
+#outro h2{
+  font-size:clamp(1.8rem,4vw,3rem);font-weight:700;
+  letter-spacing:-.03em;color:#b4ff39;margin-bottom:20px
+}
+#outro p{
+  font-size:15px;color:rgba(255,255,255,0.4);
+  max-width:460px;line-height:1.85;margin-bottom:16px
+}
+#outro .sig{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:rgba(180,255,57,0.4);letter-spacing:.14em;margin-top:28px
+}
+
+@media(max-width:768px){
+  #meter{width:44px}
+  #stage{margin-left:44px}
+  #intro,#outro{padding:40px 24px}
+  .move-row{flex-direction:column!important;padding:36px 24px;text-align:left!important}
+  .move-row.right .move-text{padding-right:0;text-align:left!important}
+  .move-row.right .move-desc{margin-left:0}
+  .move-text{padding-left:0!important;padding-right:0!important;margin-top:24px}
+  .fact-card,.fact-card.right-align{margin:0 24px 8px;text-align:left;border-left:2px solid #b4ff39;border-right:none}
+  .zone-divider{padding:36px 16px}
+}
+</style>
+</head>
+<body>
+
+<div id="meter">
+  <span id="meter-label">Height</span>
+  <div id="meter-bar"><div id="meter-fill" style="height:0%"></div></div>
+  <span id="meter-val">0m</span>
+</div>
+
+<div id="stage">
+
+  <!-- INTRO -->
+  <div id="intro">
+    <p class="eyebrow">// The calisthenics sky</p>
+    <h1>YOUR BODY<br>CAN GO<br><em>HIGHER.</em></h1>
+    <p>Scroll up through the levels of bodyweight mastery. From the ground up — each move harder, each milestone rarer, the air thinner.</p>
+    <p>No gym. No machines. Just physics, patience, and years of work.</p>
+    <p class="scroll-cue">↓ scroll to ascend</p>
+  </div>
+
+  <!-- ZONE 1 -->
+  <div class="zone-divider">
+    <p class="zone-name">Ground level — Foundation</p>
+    <p class="zone-sub">0 – 15m · Where all strength begins</p>
+  </div>
+
+  <!-- Dead Hang -->
+  <div class="move-row" data-move>
+    <div class="move-figure">
+      <svg width="120" height="190" viewBox="0 0 120 190" fill="none">
+        <line x1="15" y1="18" x2="105" y2="18" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="50" y1="18" x2="50" y2="38" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="18" x2="70" y2="38" stroke="#e8eaf0" stroke-width="2"/>
+        <circle cx="60" cy="52" r="13" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="60" y1="65" x2="60" y2="125" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="60" y1="88" x2="34" y2="112" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="60" y1="88" x2="86" y2="112" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="60" y1="125" x2="44" y2="168" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="60" y1="125" x2="76" y2="168" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="44" y1="168" x2="40" y2="182" stroke="#e8eaf0" stroke-width="1.5"/>
+        <line x1="76" y1="168" x2="80" y2="182" stroke="#e8eaf0" stroke-width="1.5"/>
+        <circle cx="60" cy="52" r="13" stroke="#b4ff39" stroke-width="1" stroke-dasharray="4 3" opacity=".35"/>
+      </svg>
+    </div>
+    <div class="move-text">
+      <p class="move-level">Level 1 · 5m</p>
+      <h3 class="move-name">Dead hang</h3>
+      <p class="move-desc">The foundation of everything overhead. Hang from a bar with full bodyweight — no kipping, no swinging. Builds grip, shoulder packing, and scapular awareness that every advanced skill depends on.</p>
+    </div>
+  </div>
+
+  <div class="fact-card" data-fact>
+    <p>Most beginners can't hang for more than 20 seconds. Build to 60s before moving to any pulling work. Your connective tissue needs this adaptation more than your muscles do.</p>
+  </div>
+
+  <!-- Pull-up -->
+  <div class="move-row right" data-move>
+    <div class="move-figure">
+      <svg width="130" height="190" viewBox="0 0 130 190" fill="none">
+        <line x1="15" y1="18" x2="115" y2="18" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="50" y1="18" x2="50" y2="36" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="18" x2="80" y2="36" stroke="#e8eaf0" stroke-width="2"/>
+        <circle cx="65" cy="50" r="13" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="65" y1="63" x2="65" y2="118" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="65" y1="84" x2="34" y2="108" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="65" y1="84" x2="96" y2="108" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="34" y1="108" x2="30" y2="120" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="96" y1="108" x2="100" y2="120" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="65" y1="118" x2="50" y2="162" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="65" y1="118" x2="80" y2="162" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="50" y1="162" x2="46" y2="178" stroke="#e8eaf0" stroke-width="1.5"/>
+        <line x1="80" y1="162" x2="84" y2="178" stroke="#e8eaf0" stroke-width="1.5"/>
+        <line x1="30" y1="18" x2="30" y2="120" stroke="#b4ff39" stroke-width="1" opacity=".3" stroke-dasharray="3 3"/>
+        <line x1="100" y1="18" x2="100" y2="120" stroke="#b4ff39" stroke-width="1" opacity=".3" stroke-dasharray="3 3"/>
+      </svg>
+    </div>
+    <div class="move-text">
+      <p class="move-level">Level 2 · 10m</p>
+      <h3 class="move-name">Pull-up</h3>
+      <p class="move-desc">The benchmark of upper-body pulling strength. Chin over bar from a full dead hang, elbows completely extended at the bottom every rep. No momentum. If you can't do 10 strict reps, don't attempt anything above this line.</p>
+    </div>
+  </div>
+
+  <div class="fact-card right-align" data-fact>
+    <p>Elite gymnasts can perform 30+ strict pull-ups. At bodyweight, 20 clean reps puts you in the top 1% of the population. The world record is 612 in under an hour.</p>
+  </div>
+
+  <!-- ZONE 2 -->
+  <div class="zone-divider">
+    <p class="zone-name">The skill zone — Intermediate</p>
+    <p class="zone-sub">15 – 40m · Where most people quit</p>
+  </div>
+
+  <!-- Muscle-up -->
+  <div class="move-row" data-move>
+    <div class="move-figure">
+      <svg width="140" height="190" viewBox="0 0 140 190" fill="none">
+        <line x1="15" y1="18" x2="125" y2="18" stroke="#e8eaf0" stroke-width="2.5"/>
+        <circle cx="70" cy="52" r="13" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="65" x2="70" y2="105" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="48" y1="18" x2="52" y2="52" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="92" y1="18" x2="88" y2="52" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="82" x2="44" y2="100" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="82" x2="96" y2="100" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="44" y1="100" x2="38" y2="114" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="96" y1="100" x2="102" y2="114" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="70" y1="105" x2="54" y2="152" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="105" x2="86" y2="152" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="54" y1="152" x2="50" y2="170" stroke="#e8eaf0" stroke-width="1.5"/>
+        <line x1="86" y1="152" x2="90" y2="170" stroke="#e8eaf0" stroke-width="1.5"/>
+        <path d="M 70 65 Q 50 52 46 30" stroke="#b4ff39" stroke-width="1.5" fill="none" opacity=".45" stroke-dasharray="3 2"/>
+        <text x="2" y="46" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">body</text>
+        <text x="2" y="57" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">over</text>
+        <text x="2" y="68" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">bar</text>
+      </svg>
+    </div>
+    <div class="move-text">
+      <p class="move-level">Level 3 · 20m</p>
+      <h3 class="move-name">Muscle-up</h3>
+      <p class="move-desc">The transition from pull to push. Generate enough force to pull to hip height, then shift your wrists over the bar into a dip. The strict version — no kip — demands explosive pulling power that takes months to develop.</p>
+    </div>
+  </div>
+
+  <div class="fact-card" data-fact>
+    <p>The transition is the hardest part. Most people can pull and dip separately but fail the moment between. Fix: practice explosive chest-to-bar pull-ups until the bar touches your sternum on every rep.</p>
+  </div>
+
+  <!-- Front lever -->
+  <div class="move-row right" data-move>
+    <div class="move-figure">
+      <svg width="140" height="160" viewBox="0 0 140 160" fill="none">
+        <line x1="10" y1="80" x2="130" y2="80" stroke="#b4ff39" stroke-width="1" opacity=".25" stroke-dasharray="4 4"/>
+        <circle cx="70" cy="80" r="13" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="93" x2="70" y2="135" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="115" x2="46" y2="138" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="115" x2="94" y2="138" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="67" x2="16" y2="67" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="67" x2="124" y2="67" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="16" y1="62" x2="16" y2="72" stroke="#b4ff39" stroke-width="2.5" opacity=".7"/>
+        <line x1="124" y1="62" x2="124" y2="72" stroke="#b4ff39" stroke-width="2.5" opacity=".7"/>
+        <text x="2" y="55" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">lats</text>
+        <text x="2" y="65" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">locked</text>
+        <line x1="46" y1="138" x2="42" y2="150" stroke="#e8eaf0" stroke-width="1.5"/>
+        <line x1="94" y1="138" x2="98" y2="150" stroke="#e8eaf0" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="move-text">
+      <p class="move-level">Level 4 · 28m</p>
+      <h3 class="move-name">Front lever</h3>
+      <p class="move-desc">A horizontal iron cross on the bar. Body perfectly parallel to the ground, arms straight, core rigid. Every muscle from fingertips to toes under isometric tension simultaneously. Even a 2-second hold signals serious strength.</p>
+    </div>
+  </div>
+
+  <div class="fact-card right-align" data-fact>
+    <p>The front lever is a FIG gymnastics skill. It requires extraordinary lat activation — the lats must depress and retract the scapula while resisting shoulder flexion under full bodyweight. Most training books don't mention it until year three.</p>
+  </div>
+
+  <!-- ZONE 3 -->
+  <div class="zone-divider">
+    <p class="zone-name">The elite zone — Advanced</p>
+    <p class="zone-sub">40 – 80m · Fewer than 1 in 1,000 trainees reach this</p>
+  </div>
+
+  <!-- Back lever -->
+  <div class="move-row" data-move>
+    <div class="move-figure">
+      <svg width="140" height="160" viewBox="0 0 140 160" fill="none">
+        <line x1="10" y1="80" x2="130" y2="80" stroke="#b4ff39" stroke-width="1" opacity=".25" stroke-dasharray="4 4"/>
+        <circle cx="70" cy="80" r="13" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="93" x2="70" y2="140" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="115" x2="46" y2="140" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="115" x2="94" y2="140" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="67" x2="16" y2="67" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="67" x2="124" y2="67" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="67" x2="70" y2="30" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="30" x2="56" y2="16" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="30" x2="84" y2="16" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="16" y1="67" x2="12" y2="82" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="124" y1="67" x2="128" y2="82" stroke="#e8eaf0" stroke-width="2"/>
+        <text x="2" y="58" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">inverted</text>
+        <circle cx="16" cy="67" r="4" stroke="#b4ff39" stroke-width="1.5" opacity=".6"/>
+        <circle cx="124" cy="67" r="4" stroke="#b4ff39" stroke-width="1.5" opacity=".6"/>
+      </svg>
+    </div>
+    <div class="move-text">
+      <p class="move-level">Level 5 · 45m</p>
+      <h3 class="move-name">Back lever</h3>
+      <p class="move-desc">Body inverted and horizontal behind the bar, arms overhead in full extension. An underrated prerequisite for iron cross and planche work. Demands scapular stability in a position most bodies have never been asked to hold.</p>
+    </div>
+  </div>
+
+  <div class="fact-card" data-fact>
+    <p>The back lever was once a required element in men's Olympic gymnastics. It was removed from the code of points in the 1990s — not because it became easy, but because the sport moved on to harder things above it.</p>
+  </div>
+
+  <!-- Human flag -->
+  <div class="move-row right" data-move>
+    <div class="move-figure">
+      <svg width="150" height="160" viewBox="0 0 150 160" fill="none">
+        <line x1="75" y1="10" x2="75" y2="150" stroke="#e8eaf0" stroke-width="3"/>
+        <circle cx="75" cy="80" r="13" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="75" y1="80" x2="20" y2="80" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="75" y1="80" x2="132" y2="80" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="75" y1="93" x2="75" y2="130" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="75" y1="110" x2="55" y2="132" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="75" y1="110" x2="95" y2="132" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="20" y1="74" x2="20" y2="86" stroke="#b4ff39" stroke-width="2.5" opacity=".7"/>
+        <line x1="132" y1="74" x2="132" y2="86" stroke="#b4ff39" stroke-width="2.5" opacity=".7"/>
+        <line x1="10" y1="80" x2="142" y2="80" stroke="#b4ff39" stroke-width="1" opacity=".2" stroke-dasharray="4 4"/>
+        <text x="2" y="72" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">push</text>
+        <text x="133" y="72" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">pull</text>
+      </svg>
+    </div>
+    <div class="move-text">
+      <p class="move-level">Level 6 · 60m</p>
+      <h3 class="move-name">Human flag</h3>
+      <p class="move-desc">Body horizontal, perpendicular to a vertical pole. One arm pushes, one arm pulls, the torso stays rigid parallel to the ground. You are cantilevering your entire bodyweight off a single anchor point — pure physics.</p>
+    </div>
+  </div>
+
+  <div class="fact-card right-align" data-fact>
+    <p>The human flag generates no less than 5x bodyweight force through the shoulder joints. Six months of dedicated pole work is the realistic minimum for a first 2-second hold — starting from a strong pulling base.</p>
+  </div>
+
+  <!-- ZONE 4 -->
+  <div class="zone-divider">
+    <p class="zone-name">The stratosphere — Expert</p>
+    <p class="zone-sub">80 – 140m · Measured in years, not months</p>
+  </div>
+
+  <!-- Handstand PU -->
+  <div class="move-row" data-move>
+    <div class="move-figure">
+      <svg width="140" height="200" viewBox="0 0 140 200" fill="none">
+        <line x1="30" y1="18" x2="110" y2="18" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="50" y1="18" x2="46" y2="60" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="90" y1="18" x2="94" y2="60" stroke="#e8eaf0" stroke-width="2"/>
+        <circle cx="70" cy="74" r="13" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="87" x2="70" y2="140" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="110" x2="44" y2="134" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="110" x2="96" y2="134" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="44" y1="134" x2="40" y2="148" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="96" y1="134" x2="100" y2="148" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="70" y1="140" x2="55" y2="180" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="140" x2="85" y2="180" stroke="#e8eaf0" stroke-width="2"/>
+        <text x="2" y="44" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">inverted</text>
+        <text x="2" y="55" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">press</text>
+        <path d="M 70 87 Q 55 70 46 50" stroke="#b4ff39" stroke-width="1.5" fill="none" opacity=".4" stroke-dasharray="3 2"/>
+      </svg>
+    </div>
+    <div class="move-text">
+      <p class="move-level">Level 7 · 90m</p>
+      <h3 class="move-name">Handstand push-up</h3>
+      <p class="move-desc">Inverted overhead pressing against gravity. The freestanding version requires a stable handstand, then strict vertical pressing through full range. The shoulder joint works in the exact opposite position from all natural human movement.</p>
+    </div>
+  </div>
+
+  <div class="fact-card" data-fact>
+    <p>A freestanding handstand push-up requires solving two problems simultaneously: the balance of the handstand, and the strength of the press. Most people spend 6–12 months on each separately before combining them.</p>
+  </div>
+
+  <!-- Handstand pull-up -->
+  <div class="move-row right" data-move>
+    <div class="move-figure">
+      <svg width="140" height="200" viewBox="0 0 140 200" fill="none">
+        <line x1="30" y1="185" x2="110" y2="185" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="50" y1="185" x2="46" y2="145" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="90" y1="185" x2="94" y2="145" stroke="#e8eaf0" stroke-width="2"/>
+        <circle cx="70" cy="130" r="13" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="117" x2="70" y2="65" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="92" x2="44" y2="70" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="92" x2="96" y2="70" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="44" y1="70" x2="40" y2="56" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="96" y1="70" x2="100" y2="56" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="70" y1="65" x2="55" y2="28" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="70" y1="65" x2="85" y2="28" stroke="#e8eaf0" stroke-width="2"/>
+        <circle cx="55" cy="16" r="4" stroke="#b4ff39" stroke-width="1.5" opacity=".6"/>
+        <circle cx="85" cy="16" r="4" stroke="#b4ff39" stroke-width="1.5" opacity=".6"/>
+        <text x="2" y="22" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">hands</text>
+        <text x="92" y="22" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">on bar</text>
+        <path d="M 70 117 Q 55 100 46 80" stroke="#b4ff39" stroke-width="1.5" fill="none" opacity=".4" stroke-dasharray="3 2"/>
+      </svg>
+    </div>
+    <div class="move-text">
+      <p class="move-level">Level 8 · 110m</p>
+      <h3 class="move-name">Handstand pull-up</h3>
+      <p class="move-desc">Begin inverted. Pull. The bar ends up at your waist. Requires overhead pulling strength that barely exists in conventional training — resisting gravity in the direction it least expects through a full 180-degree range of motion.</p>
+    </div>
+  </div>
+
+  <div class="fact-card right-align" data-fact>
+    <p>Handstand pull-ups are rare even in professional gymnastics. The combination of freestanding stability and extreme inverted pulling strength puts this skill in a category that most lifetime athletes never reach.</p>
+  </div>
+
+  <!-- ZONE 5 -->
+  <div class="zone-divider">
+    <p class="zone-name">The summit — Mastery</p>
+    <p class="zone-sub">140m+ · Where physics becomes personal</p>
+  </div>
+
+  <!-- Iron cross -->
+  <div class="move-row" data-move>
+    <div class="move-figure">
+      <svg width="160" height="160" viewBox="0 0 160 160" fill="none">
+        <circle cx="80" cy="80" r="13" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="67" x2="80" y2="28" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="93" x2="80" y2="132" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="80" x2="18" y2="80" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="80" y1="80" x2="142" y2="80" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="80" y1="28" x2="68" y2="16" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="28" x2="92" y2="16" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="132" x2="68" y2="148" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="132" x2="92" y2="148" stroke="#e8eaf0" stroke-width="2"/>
+        <circle cx="18" cy="80" r="5" stroke="#b4ff39" stroke-width="1.5" opacity=".7"/>
+        <circle cx="142" cy="80" r="5" stroke="#b4ff39" stroke-width="1.5" opacity=".7"/>
+        <text x="2" y="68" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">rings</text>
+        <text x="2" y="78" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">only</text>
+        <line x1="10" y1="80" x2="150" y2="80" stroke="#b4ff39" stroke-width="1" opacity=".2" stroke-dasharray="5 5"/>
+      </svg>
+    </div>
+    <div class="move-text">
+      <p class="move-level">Level 9 · 150m</p>
+      <h3 class="move-name">Iron cross</h3>
+      <p class="move-desc">Arms extended perfectly horizontal on the rings, body vertical. The shoulder joint is at maximum mechanical disadvantage — the lever arm is the entire arm length. Rings don't forgive. Every wobble is amplified. Gymnasts spend years for a 2-second hold.</p>
+    </div>
+  </div>
+
+  <div class="fact-card" data-fact>
+    <p>Olympic gymnasts performing an iron cross generate forces of 7–10x bodyweight through the shoulder joint. The pectoralis minor and subscapularis contract isometrically at lengths they were never designed for. And they hold it for 2 full seconds.</p>
+  </div>
+
+  <!-- Planche -->
+  <div class="move-row right" data-move>
+    <div class="move-figure">
+      <svg width="160" height="130" viewBox="0 0 160 130" fill="none">
+        <line x1="10" y1="65" x2="150" y2="65" stroke="#b4ff39" stroke-width="1" opacity=".3" stroke-dasharray="4 4"/>
+        <circle cx="80" cy="65" r="13" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="52" x2="80" y2="22" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="78" x2="80" y2="110" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="65" x2="18" y2="65" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="80" y1="65" x2="142" y2="65" stroke="#e8eaf0" stroke-width="2.5"/>
+        <line x1="80" y1="22" x2="68" y2="10" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="22" x2="92" y2="10" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="110" x2="68" y2="122" stroke="#e8eaf0" stroke-width="2"/>
+        <line x1="80" y1="110" x2="92" y2="122" stroke="#e8eaf0" stroke-width="2"/>
+        <circle cx="68" cy="10" r="4" fill="#b4ff39" opacity=".6"/>
+        <circle cx="92" cy="10" r="4" fill="#b4ff39" opacity=".6"/>
+        <text x="2" y="55" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">wrists</text>
+        <text x="2" y="66" font-family="'IBM Plex Mono',monospace" font-size="9" fill="#b4ff39" opacity=".5">only</text>
+        <path d="M 18 65 Q 50 50 80 65 Q 110 80 142 65" stroke="#b4ff39" stroke-width="1" fill="none" opacity=".3" stroke-dasharray="3 3"/>
+      </svg>
+    </div>
+    <div class="move-text">
+      <p class="move-level">Level 10 · 200m</p>
+      <h3 class="move-name">Planche</h3>
+      <p class="move-desc">Horizontal in the air, supported only by the hands, arms straight. No rings. No bar. Nothing but wrist strength, anterior deltoid capacity, and an iron core. The hardest static bodyweight skill that exists. Average training time to full planche: 3–5 years.</p>
+    </div>
+  </div>
+
+  <div class="fact-card right-align" data-fact>
+    <p>In a planche, your centre of mass must sit directly over your wrists — but your arms are angled backward. The anterior deltoids generate enormous force to prevent shoulder collapse. Wrist conditioning alone takes 6–12 months before full training loads can be applied.</p>
+  </div>
+
+  <!-- OUTRO -->
+  <div id="outro">
+    <h2>You've reached the summit.</h2>
+    <p>The planche sits at the top of the bodyweight skill tree. A handful of athletes in the world can hold it for more than 5 seconds. It takes years to build. Inches of progress feel like miles.</p>
+    <p>But it starts the same way every time. A bar. Your hands. A dead hang.</p>
+    <p class="sig">// The body is the machine. Train accordingly.</p>
+  </div>
+
+</div>
+
+<div id="scroll-hint">↓ scroll to ascend</div>
+
+<script>
+const moveRows  = document.querySelectorAll('[data-move]');
+const factCards = document.querySelectorAll('[data-fact]');
+const mFill     = document.getElementById('meter-fill');
+const mVal      = document.getElementById('meter-val');
+const hint      = document.getElementById('scroll-hint');
+const MAX_H     = 200;
+
+function onScroll() {
+  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = scrollable > 0 ? Math.min(window.scrollY / scrollable, 1) : 0;
+  const h   = Math.round(pct * MAX_H);
+  mFill.style.height = (pct * 100) + '%';
+  mVal.textContent   = h + 'm';
+  if (window.scrollY > 80) hint.style.opacity = '0';
+
+  const vh = window.innerHeight;
+  moveRows.forEach(el => {
+    if (el.getBoundingClientRect().top < vh * 0.82) el.classList.add('visible');
+  });
+  factCards.forEach(el => {
+    if (el.getBoundingClientRect().top < vh * 0.88) el.classList.add('visible');
+  });
+}
+
+window.addEventListener('scroll', onScroll, {passive:true});
+onScroll();
+</script>
+</body>
+</html>
