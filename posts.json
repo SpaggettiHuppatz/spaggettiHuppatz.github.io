@@ -1,0 +1,70 @@
+[
+  {
+    "id": "planche-progression",
+    "date": "2025-11-14",
+    "tag": "SKILL",
+    "title": "Planche: Six Months In",
+    "description": "The planche is not a trick. It's a full-body isometric battle between your anterior deltoids, serratus anterior, and gravity — and gravity has been winning for most of my life.\n\nI started with tuck holds at 10-second sets. Couldn't get past 15 seconds without shaking. The key unlock for me was understanding scapular protraction — you're not just holding yourself up, you're actively pushing the floor away and rounding your upper back into the movement.\n\nAfter three months I hit advanced tuck. After five, straddle planche for 4 seconds. Not pretty, but it's there. The wrist conditioning alone took six weeks of daily prep work before I could even attempt longer sessions.",
+    "photos": [
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80",
+      "https://images.unsplash.com/photo-1598971639058-fab3c3109a00?w=800&q=80",
+      "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=800&q=80"
+    ],
+    "stats": [
+      { "label": "HOLD TIME", "value": "4s" },
+      { "label": "WEEKS IN", "value": "26" },
+      { "label": "DAILY VOLUME", "value": "~40 min" }
+    ]
+  },
+  {
+    "id": "handstand-pullup",
+    "date": "2025-09-03",
+    "tag": "MILESTONE",
+    "title": "First Handstand Pull-Up",
+    "description": "Handstand pull-ups require overhead pressing strength, scapular stability, and a freestanding handstand that doesn't wobble — all three at once. For a long time I had the pulling strength but zero overhead stability.\n\nThe fix was training handstands against a wall first, building straight-body compression, then moving to freestanding holds of 30+ seconds before attempting any pulling movement. The pull itself is counterintuitive — you lead with elbows flaring out wide before pulling them down and in.\n\nFirst clean rep happened on a random Tuesday. Didn't even film it. Did it again immediately three times just to make sure it was real.",
+    "photos": [
+      "https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=800&q=80",
+      "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?w=800&q=80",
+      "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80"
+    ],
+    "stats": [
+      { "label": "MAX REPS", "value": "3" },
+      { "label": "TRAINING AGE", "value": "2 yrs" },
+      { "label": "FREESTAND", "value": "45s" }
+    ]
+  },
+  {
+    "id": "front-lever",
+    "date": "2025-07-21",
+    "tag": "PROGRESS",
+    "title": "Front Lever: Hitting Full for the First Time",
+    "description": "The front lever gets overlooked compared to planche because it looks easier. It is not easier. It demands extraordinary lats, rear delts, and core stiffness — and if your thoracic spine rounds even slightly, you drop.\n\nI spent four months on tuck variations, then straddle, then one-leg extensions before I could hold a full lever for 2 seconds. My breakthrough was adding weighted pull-ups (20kg) as a strength supplement, which gave me the lat thickness to actually maintain body position.\n\nCurrent best is a 5-second hold, filmed and verified. The feeling of the full lock is unlike anything else in calisthenics — completely horizontal, no assistance, just tension.",
+    "photos": [
+      "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=800&q=80",
+      "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=800&q=80",
+      "https://images.unsplash.com/photo-1552196563-55cd4e45efb3?w=800&q=80"
+    ],
+    "stats": [
+      { "label": "HOLD TIME", "value": "5s" },
+      { "label": "BODYWEIGHT", "value": "78kg" },
+      { "label": "MONTHS", "value": "4" }
+    ]
+  },
+  {
+    "id": "muscle-up",
+    "date": "2025-04-10",
+    "tag": "FOUNDATION",
+    "title": "Strict Muscle-Up: Why Form Matters",
+    "description": "Anyone can kip a muscle-up. The strict version is a different exercise entirely — it forces you to generate enough pulling power to transition cleanly over the bar without momentum.\n\nI spent six weeks unable to break through the transition. The issue: I was pulling to my chest instead of pulling to my hips. Once you understand the muscle-up as a hip-height pull followed by a push, the pattern clicks.\n\nNow sitting at 5 strict reps. The foundation this built for ring work and bar muscle-up variations is enormous. Everything in upper-body calisthenics flows through this movement.",
+    "photos": [
+      "https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=800&q=80",
+      "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80",
+      "https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=800&q=80"
+    ],
+    "stats": [
+      { "label": "MAX REPS", "value": "5" },
+      { "label": "WEEKS TO FIRST", "value": "14" },
+      { "label": "PULL-UP MAX", "value": "22" }
+    ]
+  }
+]
